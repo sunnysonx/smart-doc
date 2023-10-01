@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { createClientComponentClient  } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { useLocalStorage } from '@mantine/hooks';
+import HTMLRender from 'src/components/HtmlRender';
 
 export default function Demo() {
   const supabase = createClientComponentClient ();
@@ -60,7 +61,7 @@ export default function Demo() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({ "messages": [{ "role": "system", "content": "Sunteți un bot AI care poate completa documentele cu detalii despre clienți sau poate genera un document pe baza solicitării. Vă voi oferi informații despre Client și trebuie să completați documentul cu detaliile clientului." }, { "role": "user", "content": "Customer Information: " + JSON.stringify(selectedPerson) }, { "role": "user", "content": document }, { "role": "system", "content": "Înfrumusețați răspunsul cu Markdown. Folosiți linii noi acolo unde este necesar. Daca documentul contine loc pentru Data sau Semnatura, acestea trebuie sa fie pozitionate jos stanga si dreapta" }, { "role": "system", "content": "Dacă nu a fost furnizată o cerere/document, atunci trebuie să generați un document pe baza informatiilor furnizate. Nu include toate detaliile care le ai despre client daca nu este necesar, ca exemplu, nu e nevoie sa indici detaliile pasaport daca deja ai indicat detaliile despre buletin. Daca documentul nu continte campuri pentru anumite informatii despre client, atunci NU improviza si nu le adauga in document fara necesitate. Highlight with bold my personal details in the document." }], "model": model, "temperature": 1, "presence_penalty": 0, "top_p": 1, "frequency_penalty": 0, "stream": false })
+      body: JSON.stringify({ "messages": [{ "role": "system", "content": "Sunteți un bot AI care poate completa documentele cu detalii despre clienți sau poate genera un document pe baza solicitării. Vă voi oferi informații despre Client și trebuie să completați documentul cu detaliile clientului." }, { "role": "user", "content": "Customer Information: " + JSON.stringify(selectedPerson) }, { "role": "user", "content": document }, { "role": "system", "content": "Înfrumusețați răspunsul cu elemente HTML si style ca sa arate bine, nu returna o intreaga pagina html cu body/head, returneaza DOAR documentul. Adauga randuri/spatii unde e necesar. Pune titlul documentul pe centru. Adauga campul pentru Data si Semnatura daca e necesar. Daca documentul contine loc pentru Data sau Semnatura, acestea trebuie sa fie pozitionate jos stanga si dreapta" }, { "role": "system", "content": "Dacă nu a fost furnizată o cerere/document, atunci trebuie să generați un document pe baza informatiilor furnizate. Nu include toate detaliile care le ai despre client daca nu este necesar, ca exemplu, nu e nevoie sa indici detaliile pasaport daca deja ai indicat detaliile despre buletin. Daca documentul nu continte campuri pentru anumite informatii despre client, atunci NU improviza si nu le adauga in document fara necesitate. Highlight with bold my personal details in the document." }], "model": model, "temperature": 1, "presence_penalty": 0, "top_p": 1, "frequency_penalty": 0, "stream": false })
     })
       .then((response) => response.json())
       .then((data) => {
@@ -96,15 +97,15 @@ export default function Demo() {
             setSelectedDocument(document);
             setDocument(document.content);
           }}/>
-          {selectedDocument.value ==='custom' && <TextInput label="Custom Document" id="custom-document" className="mb-4" onChange={(event) => {
+          {selectedDocument.value ==='custom' && <Textarea minRows={5} label="Custom Document" id="custom-document" className="mb-4" onChange={(event) => {
             setCustomDocument(event.currentTarget.value);
             console.log('customDocument',event.currentTarget.value);
             setDocument('Genereaza un document pe baza acestui prompt: '+event.currentTarget.value);
           } }/>}
-          {selectedDocument?.hasDocumentType &&  <TextInput label="Document" id="document-type" className="mb-4" onChange={(value) => {
-            setNestedDocumentType(value);
+          {selectedDocument?.hasDocumentType &&  <TextInput label="Document" id="document-type" className="mb-4" onChange={(event) => {
+            setNestedDocumentType(event.currentTarget.value);
           }}/>}
-          <Button variant="filled" type="submit" loading={loading}>
+          <Button variant="filled" type="submit" loading={loading} loaderProps={{ type: 'dots' }}>
             Submit
           </Button>
           <br/>
@@ -119,7 +120,8 @@ export default function Demo() {
       <Paper shadow="xl" p="xl" withBorder 
         className="p-8 mx-4 my-8 md:mx-20 md:my-16"
       >
-        <ReactMarkdown>{response}</ReactMarkdown>
+        {/* <ReactMarkdown>{response}</ReactMarkdown> */}
+        <HTMLRender data={response || ''}/>
       </Paper>
       </div>
     </div>
