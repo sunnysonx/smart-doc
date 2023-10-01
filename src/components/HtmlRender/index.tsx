@@ -11,7 +11,7 @@ function useParseWithHTML(text: string = '') {
 function ComponentHasNoData() {
   return null;
 }
-
+// @ts-ignore
 const HTMLRender = (props) => {
   const data = props.data;
   const parseHtml = useParseWithHTML(data);
